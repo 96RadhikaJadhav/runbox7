@@ -383,38 +383,34 @@ export class AppComponent implements OnInit, AfterViewInit, CanvasTableSelectLis
     });
 
     // Download visible messages in the background
-    this.canvastable.repaintDoneSubject.pipe(
-        filter(() => !this.canvastable.isScrollInProgress()),
-        throttleTime(1000),
-        map(() => this.canvastable.getVisibleRowIndexes()),
-        mergeMap((rowIndexes) =>
-          from(
-            rowIndexes
-              .filter(ndx => ndx < this.canvastable.rows.rowCount())
-              .map(ndx => {
-                const messageId = this.canvastable.rows.getRowMessageId(ndx);
-                return of(messageId);
-            })
-          ).pipe(
-            mergeMap(o =>
-              o.pipe(
-                mergeMap(messageId => this.rmmapi.getMessageContents(messageId)),
-                take(1),
-                tap(() => this.canvastable.hasChanges = true)
-              ), 1),
-            bufferCount(rowIndexes.length)
-          )
-        )
+    this.canvastable.visibleRowsChanged.pipe(
+      throttleTime(1000)
+    ).subscribe((rowIndexes: number[]) =>
+      from(
+        rowIndexes
+          .filter(ndx => ndx < this.canvastable.rows.rowCount())
+          .map(ndx => {
+            const messageId = this.canvastable.rows.getRowMessageId(ndx);
+            return of(messageId);
+        })
+      ).pipe(
+        mergeMap(o =>
+          o.pipe(
+            mergeMap(messageId => this.rmmapi.getMessageContents(messageId)),
+            take(1),
+            tap(() => this.canvastable.hasChanges = true)
+          ), 1),
+        bufferCount(rowIndexes.length)
       )
-      .subscribe();
+    );
 
-      if ('serviceWorker' in navigator) {
-        try  {
-          Notification.requestPermission();
-        } catch (e) {}
-      }
+    if ('serviceWorker' in navigator) {
+      try  {
+        Notification.requestPermission();
+      } catch (e) {}
+    }
 
-      this.subscribeToNotifications();
+    this.subscribeToNotifications();
   }
 
   selectMessageFromFragment(fragment: string): void {
