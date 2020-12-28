@@ -656,7 +656,7 @@ export class SearchService {
     if (folderPath === 'Inbox') {
       // Workaround for IMAP setting folder to "INBOX" when moving messages  there
       querytext += `(${folderQuery('Inbox')} OR ${folderQuery('INBOX')})`;
-    } else {
+    } else if (folderPath) {
       querytext += folderQuery(folderPath);
     }
 
