@@ -887,7 +887,6 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
         return;
     }
 
-    console.log('Change selectedFolder');
     this.clearSelection();
 
     let doResetColumns = false;
@@ -1109,6 +1108,8 @@ export class AppComponent implements OnInit, AfterViewInit, DoCheck {
     if (fragment && this.singlemailviewer?.messageId) {
       fragment += `:${this.singlemailviewer.messageId}`;
     }
+    // needed so that our fragment listener doesn't trigger any further navigation
+    this.fragment = fragment;
     this.router.navigate(['/'], { fragment });
   }
 }
